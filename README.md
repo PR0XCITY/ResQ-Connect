@@ -1,4 +1,4 @@
-# 🌸 SaheliApp
+# 🌸 Saheli
 
 the world doesn’t need another app. it needs trust. it needs safety. it needs **saheli**.  
 
@@ -113,3 +113,4 @@ git clone https://github.com/Darshcmd/SaheliApp.git
 cd SaheliApp
 npm install
 npx expo start
+
