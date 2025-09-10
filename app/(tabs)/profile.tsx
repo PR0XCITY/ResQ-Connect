@@ -246,8 +246,8 @@ export default function ProfileScreen() {
                 <User size={32} color="#8B5CF6" />
               </View>
               <View style={styles.profileInfo}>
-                <Text style={dynamicStyles.profileName}>Darsh Soni</Text>
-                <Text style={dynamicStyles.profileEmail}>soni.darsh2004@gmail.com</Text>
+                <Text style={dynamicStyles.profileName}>Pritisha Mishra</Text>
+                <Text style={dynamicStyles.profileEmail}>pritishamishra2024@gmail.com</Text>
               </View>
             </View>
           </Animated.View>
