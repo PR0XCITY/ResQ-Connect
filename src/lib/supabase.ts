@@ -8,24 +8,31 @@
 import { createClient } from '@supabase/supabase-js';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Constants from 'expo-constants';
+import { mockSupabase } from '@/src/services/mock-supabase';
+
+// Check if we're in demo mode
+const isDemoMode = Constants.expoConfig?.extra?.demoMode || process.env.EXPO_PUBLIC_DEMO_MODE === 'true';
 
 // Get Supabase configuration from environment variables
 const supabaseUrl = Constants.expoConfig?.extra?.supabaseUrl || process.env.EXPO_PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = Constants.expoConfig?.extra?.supabaseAnonKey || process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error('Missing Supabase configuration. Please check your environment variables.');
-}
+// Use mock Supabase in demo mode
+export const supabase = isDemoMode ? mockSupabase : (() => {
+  if (!supabaseUrl || !supabaseAnonKey) {
+    throw new Error('Missing Supabase configuration. Please check your environment variables.');
+  }
 
-// Create Supabase client with AsyncStorage for session persistence
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-  auth: {
-    storage: AsyncStorage,
-    autoRefreshToken: true,
-    persistSession: true,
-    detectSessionInUrl: false,
-  },
-});
+  // Create Supabase client with AsyncStorage for session persistence
+  return createClient(supabaseUrl, supabaseAnonKey, {
+    auth: {
+      storage: AsyncStorage,
+      autoRefreshToken: true,
+      persistSession: true,
+      detectSessionInUrl: false,
+    },
+  });
+})();
 
 // Database types
 export interface Profile {
@@ -76,8 +83,11 @@ export interface DangerZone {
   is_active: boolean;
 }
 
+// Import mock auth helpers
+import { mockAuth } from '@/src/services/mock-supabase';
+
 // Authentication helpers
-export const auth = {
+export const auth = isDemoMode ? mockAuth : {
   // Sign up with email, password, and username
   async signUp(email: string, password: string, username: string) {
     const { data, error } = await supabase.auth.signUp({
@@ -174,8 +184,11 @@ export const auth = {
   },
 };
 
+// Import mock disaster helpers
+import { mockDisasters } from '@/src/services/mock-supabase';
+
 // Disaster management helpers
-export const disasters = {
+export const disasters = isDemoMode ? mockDisasters : {
   // Report a new disaster
   async reportDisaster(report: Omit<DisasterReport, 'id' | 'created_at' | 'reporter_id'>) {
     const user = await auth.getCurrentUser();
@@ -257,8 +270,11 @@ export const disasters = {
   },
 };
 
+// Import mock helpers
+import { mockDangerZones, mockAI, mockBlockchain } from '@/src/services/mock-supabase';
+
 // Danger zones helpers
-export const dangerZones = {
+export const dangerZones = isDemoMode ? mockDangerZones : {
   // Get all active danger zones
   async getDangerZones() {
     const { data, error } = await supabase
@@ -285,7 +301,7 @@ export const dangerZones = {
 };
 
 // AI helpers
-export const ai = {
+export const ai = isDemoMode ? mockAI : {
   // Get AI-generated hazard summary
   async getHazardSummary() {
     const { data, error } = await supabase.functions.invoke('get-hazard-summary');
@@ -296,7 +312,7 @@ export const ai = {
 };
 
 // Blockchain helpers
-export const blockchain = {
+export const blockchain = isDemoMode ? mockBlockchain : {
   // Verify incident on blockchain (stub implementation)
   async verifyIncident(incidentId: string, data: any) {
     // This is a stub implementation

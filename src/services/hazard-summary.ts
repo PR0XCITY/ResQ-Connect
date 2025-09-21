@@ -6,7 +6,12 @@
  */
 
 import { openaiClient, SafetyContext } from './openai-client';
+import { mockOpenAIClient } from './mock-openai-client';
 import { DisasterReport } from '@/src/lib/supabase';
+import Constants from 'expo-constants';
+
+// Check if we're in demo mode
+const isDemoMode = Constants.expoConfig?.extra?.demoMode || process.env.EXPO_PUBLIC_DEMO_MODE === 'true';
 
 export interface HazardSummary {
   summary: string;
@@ -38,7 +43,7 @@ export interface HazardAssessment {
 }
 
 export class HazardSummaryService {
-  private openaiClient = openaiClient;
+  private openaiClient = isDemoMode ? mockOpenAIClient : openaiClient;
 
   /**
    * Generate comprehensive hazard summary for North-Eastern India

@@ -113,4 +113,31 @@ git clone https://github.com/Darshcmd/ResQConnect.git
 cd ResQConnect
 npm install
 npx expo start
+```
+
+---
+
+## 🚀 **Quick Demo (No Setup Required)**
+
+To run the frontend prototype without any API keys or backend services:
+
+```bash
+npm run demo
+```
+
+This will start the app in demo mode with:
+- ✅ Mock authentication (instant login)
+- ✅ Sample disaster reports and danger zones
+- ✅ AI responses (demo mode)
+- ✅ Interactive disaster map
+- ✅ All UI features working
+
+**No environment variables needed!**
+
+### 📱 **Viewing the App**
+
+- **Web Browser**: Press `w` after starting
+- **Mobile Device**: Install Expo Go app and scan QR code
+- **iOS Simulator**: Press `i` (Mac only)
+- **Android Emulator**: Press `a`
 

@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "EXPO_NO_TELEMETRY=1 expo start",
     "start": "expo start",
+    "demo": "EXPO_NO_TELEMETRY=1 EXPO_PUBLIC_DEMO_MODE=true expo start --config app.config.demo.js",
     "build:web": "expo export --platform web",
     "build:android": "expo build:android",
     "build:ios": "expo build:ios",
