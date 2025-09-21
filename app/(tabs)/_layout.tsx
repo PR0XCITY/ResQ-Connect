@@ -1,5 +1,5 @@
 import { Tabs } from 'expo-router';
-import { Shield, MapPin, TriangleAlert as AlertTriangle, Heart, User, Bot } from 'lucide-react-native';
+import { Shield, MapPin, TriangleAlert as AlertTriangle, Heart, User, Bot, Map } from 'lucide-react-native';
 import { Platform } from 'react-native';
 import { useTheme } from '@/contexts/ThemeContext';
 
@@ -30,6 +30,15 @@ export default function TabLayout() {
           title: 'Emergency',
           tabBarIcon: ({ size, color }) => (
             <Shield size={size} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="disaster-map"
+        options={{
+          title: 'Disaster Map',
+          tabBarIcon: ({ size, color }) => (
+            <Map size={size} color={color} />
           ),
         }}
       />
