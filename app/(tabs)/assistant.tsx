@@ -31,7 +31,7 @@ export default function AIAssistantScreen() {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
-      text: "Hello! I'm your Saheli AI safety assistant. I'm here to help you with safety advice, emergency guidance, and answer any questions about staying safe. How can I assist you today?",
+      text: "Hello! I'm your ResQ Connect AI safety assistant. I'm here to help you with travel safety advice, emergency guidance, and answer any questions about staying safe in North-Eastern India. How can I assist you today?",
       isUser: false,
       timestamp: new Date(),
     }
@@ -76,12 +76,12 @@ export default function AIAssistantScreen() {
 🌟 **Choose Safe Routes**
 - Use well-lit, populated areas whenever possible
 - Avoid shortcuts through isolated areas
-- Use the Safe Routes feature in Saheli to find community-verified paths
+- Use the Safe Routes feature in ResQ Connect to find community-verified paths
 
 📱 **Stay Connected**
 - Share your location with trusted contacts
 - Keep your phone charged and easily accessible
-- Consider using the Saheli emergency alert if you feel threatened
+- Consider using the ResQ Connect emergency alert if you feel threatened
 
 👥 **Blend In & Be Confident**
 - Walk with purpose and confidence
@@ -114,7 +114,7 @@ Would you like specific advice for any particular situation?`;
 - Poorly lit or isolated paths
 - Construction zones or blocked walkways
 
-The Saheli app continuously updates route safety based on real community feedback!`;
+The ResQ Connect app continuously updates route safety based on real community feedback!`;
     }
     
     if (lowerMessage.includes('emergency') || lowerMessage.includes('contact')) {
@@ -131,7 +131,7 @@ The Saheli app continuously updates route safety based on real community feedbac
 - Consider adding local emergency services numbers
 
 ⚡ **Quick Access Setup**
-- Use Saheli's one-tap emergency alert feature
+- Use ResQ Connect's one-tap emergency alert feature
 - Set up emergency contacts in your phone's emergency settings
 - Practice using emergency features so you're familiar with them
 
@@ -164,7 +164,7 @@ Remember: In a real emergency, always call local emergency services (911, 100, e
 📱 **Document & Report**
 - If safe to do so, document the incident (photos, videos, notes)
 - Report to local authorities if appropriate
-- Share the incident in Saheli's Community Alerts to warn others
+- Share the incident in ResQ Connect's Community Alerts to warn others
 
 👥 **Seek Help**
 - Ask nearby people for help if needed
@@ -200,7 +200,7 @@ You're not alone, and it's never your fault. Stay strong! 💜`;
 🚨 **Emergency Preparedness**
 - Emergency contact setup
 - Crisis response planning
-- Using Saheli's safety features
+- Using ResQ Connect's safety features
 
 👥 **Social Safety**
 - Dealing with harassment

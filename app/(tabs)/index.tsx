@@ -236,8 +236,8 @@ export default function EmergencyScreen() {
         style={styles.gradient}
       >
         <View style={styles.header}>
-          <Text style={dynamicStyles.title}>Saheli</Text>
-          <Text style={dynamicStyles.subtitle}>Your Safety Companion</Text>
+          <Text style={dynamicStyles.title}>ResQ Connect</Text>
+          <Text style={dynamicStyles.subtitle}>Your Travel Safety Companion</Text>
         </View>
 
         <View style={styles.emergencySection}>

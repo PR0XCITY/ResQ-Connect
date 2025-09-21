@@ -1,10 +1,10 @@
-# 🌸 Saheli
+# 🚨 ResQ Connect
 
-the world doesn’t need another app. it needs trust. it needs safety. it needs **saheli**.  
+the world doesn't need another app. it needs trust. it needs safety. it needs **ResQ Connect**.  
 
 we’ve all seen women compromise freedom for safety—taking longer routes, sharing live locations, clutching phones like lifelines. and yet, when danger strikes, tech usually reacts too late.  
 
-saheli flips that. it’s not just an app. it’s a wearable dashcam, an ai safety network, and a donation engine all in one. built for women. built to protect. built to empower.  
+ResQ Connect flips that. it's not just an app. it's a wearable dashcam, an ai safety network, and a donation engine all in one. built for travelers. built to protect. built to empower.  
 
 ---
 
@@ -22,14 +22,14 @@ the hardware is simple but powerful: esp32-cam with night vision, local storage,
 
 the mobile app completes the loop: start or stop recording, trigger sos with a tap or a voice, share live location, choose safer routes, and send alerts to trusted contacts.  
 
-when sos goes off, family, friends, and even nearby saheli users get notified instantly. danger becomes visible. safety becomes collective.  
+when sos goes off, family, friends, and even nearby ResQ Connect users get notified instantly. danger becomes visible. safety becomes collective.  
 
 ---
 
 ## what makes it different
 
 anyone can add an sos button. anyone can plot maps. anyone can build donation forms.  
-but **saheli stacks what others separate**.  
+but **ResQ Connect stacks what others separate**.  
 
 - human dashcam with esp32-cam + night vision  
 - safest route navigation powered by community ratings  
@@ -46,10 +46,10 @@ it’s not about fighting for the peak in one skill. it’s about owning the int
 ## accessibility
 
 safety should never depend on literacy or language.  
-so saheli speaks through vibrations, haptics, and voice.  
+so ResQ Connect speaks through vibrations, haptics, and voice.  
 
 - english at launch, hindi in the pipeline  
-- voice input like “saheli, help me” to trigger sos  
+- voice input like "ResQ Connect, help me" to trigger sos  
 - large-icon simplified ui for lower literacy users  
 - distinct haptic patterns for sos, low battery, incoming calls  
 - visual + audio alerts so nothing goes unnoticed  
@@ -109,8 +109,8 @@ install dependencies.
 run it with expo.  
 
 ```bash
-git clone https://github.com/Darshcmd/SaheliApp.git
-cd SaheliApp
+git clone https://github.com/Darshcmd/ResQConnect.git
+cd ResQConnect
 npm install
 npx expo start
 
