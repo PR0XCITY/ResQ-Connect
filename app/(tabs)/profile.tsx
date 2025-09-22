@@ -386,8 +386,8 @@ export default function ProfileScreen() {
             entering={FadeInDown.delay(800).duration(600)}
             style={styles.versionSection}
           >
-            <Text style={dynamicStyles.versionText}>Saheli v1.0.0</Text>
-            <Text style={dynamicStyles.versionSubtext}>My Saheli, My Shield</Text>
+            <Text style={dynamicStyles.versionText}>ResQ Connect v0.1.1</Text>
+            <Text style={dynamicStyles.versionSubtext}>My Rescue, ResQ Connect</Text>
           </Animated.View>
         </ScrollView>
       </LinearGradient>
