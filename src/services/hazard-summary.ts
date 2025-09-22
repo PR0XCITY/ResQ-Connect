@@ -5,13 +5,7 @@
  * using OpenAI integration for the disaster management module.
  */
 
-import { openaiClient, SafetyContext } from './openai-client';
-import { mockOpenAIClient } from './mock-openai-client';
 import { DisasterReport } from '@/src/lib/supabase';
-import Constants from 'expo-constants';
-
-// Check if we're in demo mode
-const isDemoMode = Constants.expoConfig?.extra?.demoMode || process.env.EXPO_PUBLIC_DEMO_MODE === 'true';
 
 export interface HazardSummary {
   summary: string;
@@ -43,7 +37,6 @@ export interface HazardAssessment {
 }
 
 export class HazardSummaryService {
-  private openaiClient = isDemoMode ? mockOpenAIClient : openaiClient;
 
   /**
    * Generate comprehensive hazard summary for North-Eastern India
@@ -53,27 +46,8 @@ export class HazardSummaryService {
       // Analyze disaster reports
       const analysis = this.analyzeDisasterReports(disasterReports);
       
-      // Create context for AI
-      const context: SafetyContext = {
-        location: {
-          latitude: 26.1445, // Guwahati coordinates as default
-          longitude: 91.7362,
-          address: 'North-Eastern India',
-        },
-        timeOfDay: this.getTimeOfDay(),
-        weather: 'clear', // This would be fetched from weather API
-        userLanguage: 'en',
-        emergencyLevel: analysis.overallRisk > 0.7 ? 'critical' : 
-                       analysis.overallRisk > 0.5 ? 'high' : 
-                       analysis.overallRisk > 0.3 ? 'medium' : 'low',
-      };
-
-      // Generate AI summary
-      const prompt = this.buildHazardSummaryPrompt(analysis, disasterReports);
-      const response = await this.openaiClient.generateSafetyAdvice(prompt, context);
-
-      // Parse AI response into structured data
-      return this.parseHazardSummary(response.text, analysis);
+      // Generate mock summary based on analysis
+      return this.generateMockHazardSummary(analysis, disasterReports);
     } catch (error) {
       console.error('Error generating hazard summary:', error);
       return this.getFallbackHazardSummary(disasterReports);
@@ -95,20 +69,8 @@ export class HazardSummaryService {
       // Calculate risk factors
       const riskFactors = this.calculateRiskFactors(latitude, longitude, nearbyReports);
       
-      // Generate AI assessment
-      const context: SafetyContext = {
-        location: { latitude, longitude },
-        timeOfDay: this.getTimeOfDay(),
-        userLanguage: 'en',
-        emergencyLevel: riskFactors.overallRisk > 0.7 ? 'critical' : 
-                       riskFactors.overallRisk > 0.5 ? 'high' : 
-                       riskFactors.overallRisk > 0.3 ? 'medium' : 'low',
-      };
-
-      const prompt = this.buildLocationAssessmentPrompt(latitude, longitude, riskFactors, nearbyReports);
-      const response = await this.openaiClient.generateSafetyAdvice(prompt, context);
-
-      return this.parseLocationAssessment(response.text, riskFactors);
+      // Generate mock assessment
+      return this.generateMockLocationAssessment(latitude, longitude, riskFactors, nearbyReports);
     } catch (error) {
       console.error('Error assessing location hazard:', error);
       return this.getFallbackLocationAssessment(latitude, longitude);
@@ -124,21 +86,8 @@ export class HazardSummaryService {
     location: { latitude: number; longitude: number }
   ): Promise<string[]> {
     try {
-      const context: SafetyContext = {
-        location,
-        timeOfDay: this.getTimeOfDay(),
-        userLanguage: 'en',
-        emergencyLevel: severity as any,
-      };
-
-      const prompt = `Generate emergency recommendations for a ${severity} ${disasterType} in North-Eastern India. 
-      Include immediate actions, safety measures, evacuation procedures, and emergency contacts. 
-      Focus on practical, actionable advice for travelers and locals.`;
-
-      const response = await this.openaiClient.generateSafetyAdvice(prompt, context);
-      
-      // Parse recommendations from AI response
-      return this.parseRecommendations(response.text);
+      // Generate mock recommendations based on disaster type and severity
+      return this.generateMockRecommendations(disasterType, severity);
     } catch (error) {
       console.error('Error generating emergency recommendations:', error);
       return this.getFallbackRecommendations(disasterType, severity);
@@ -288,141 +237,6 @@ export class HazardSummaryService {
     return 'night';
   }
 
-  /**
-   * Build prompt for hazard summary generation
-   */
-  private buildHazardSummaryPrompt(analysis: any, disasterReports: DisasterReport[]): string {
-    return `Generate a comprehensive hazard summary for North-Eastern India based on the following disaster data:
-
-    Total Reports: ${analysis.totalReports}
-    Recent Reports (24h): ${analysis.recentReports}
-    Disaster Types: ${JSON.stringify(analysis.disasterTypes)}
-    Severity Distribution: ${JSON.stringify(analysis.severityLevels)}
-    Overall Risk Level: ${(analysis.overallRisk * 100).toFixed(1)}%
-    
-    Recent Disaster Reports:
-    ${disasterReports.slice(0, 10).map(report => 
-      `- ${report.disaster_type} (${report.severity}) at ${report.latitude}, ${report.longitude} - ${report.description}`
-    ).join('\n')}
-    
-    Provide a clear, actionable summary including:
-    1. Current risk assessment
-    2. Most affected areas
-    3. Specific recommendations for travelers
-    4. Emergency contact information
-    5. Weather and terrain considerations
-    6. Safety precautions
-    
-    Focus on practical advice for people traveling in North-Eastern India.`;
-  }
-
-  /**
-   * Build prompt for location assessment
-   */
-  private buildLocationAssessmentPrompt(
-    latitude: number, 
-    longitude: number, 
-    riskFactors: any, 
-    nearbyReports: DisasterReport[]
-  ): string {
-    return `Assess the safety risk for location ${latitude}, ${longitude} in North-Eastern India:
-
-    Risk Factors:
-    - Weather Risk: ${(riskFactors.weather * 100).toFixed(1)}%
-    - Terrain Risk: ${(riskFactors.terrain * 100).toFixed(1)}%
-    - Infrastructure Risk: ${(riskFactors.infrastructure * 100).toFixed(1)}%
-    - Population Risk: ${(riskFactors.population * 100).toFixed(1)}%
-    - Historical Risk: ${(riskFactors.historical * 100).toFixed(1)}%
-    - Overall Risk: ${(riskFactors.overallRisk * 100).toFixed(1)}%
-    
-    Nearby Incidents:
-    ${nearbyReports.map(report => 
-      `- ${report.disaster_type} (${report.severity}) - ${report.description}`
-    ).join('\n')}
-    
-    Provide specific recommendations and warnings for this location.`;
-  }
-
-  /**
-   * Parse AI response into structured hazard summary
-   */
-  private parseHazardSummary(text: string, analysis: any): HazardSummary {
-    // This is a simplified parser - in production, you'd use more sophisticated NLP
-    const lines = text.split('\n').filter(line => line.trim());
-    
-    return {
-      summary: lines.slice(0, 3).join(' '),
-      riskLevel: analysis.overallRisk > 0.7 ? 'critical' : 
-                analysis.overallRisk > 0.5 ? 'high' : 
-                analysis.overallRisk > 0.3 ? 'medium' : 'low',
-      affectedAreas: analysis.highRiskAreas.map((area: any) => 
-        `${area.lat.toFixed(4)}, ${area.lng.toFixed(4)}`
-      ),
-      recommendations: this.parseRecommendations(text),
-      weatherImpact: 'Monitor weather conditions closely',
-      emergencyContacts: [
-        'Police: 100',
-        'Fire: 101', 
-        'Ambulance: 102',
-        'Disaster Management: 108'
-      ],
-      timestamp: new Date(),
-      confidence: 0.8,
-    };
-  }
-
-  /**
-   * Parse AI response into location assessment
-   */
-  private parseLocationAssessment(text: string, riskFactors: any): HazardAssessment {
-    return {
-      location: { latitude: 0, longitude: 0 }, // Will be set by caller
-      riskFactors,
-      overallRisk: riskFactors.overallRisk,
-      recommendations: this.parseRecommendations(text),
-      warnings: this.parseWarnings(text),
-    };
-  }
-
-  /**
-   * Parse recommendations from AI response
-   */
-  private parseRecommendations(text: string): string[] {
-    const recommendations: string[] = [];
-    const lines = text.split('\n');
-    
-    lines.forEach(line => {
-      if (line.includes('•') || line.includes('-') || line.includes('*')) {
-        const cleanLine = line.replace(/^[•\-\*]\s*/, '').trim();
-        if (cleanLine.length > 10) {
-          recommendations.push(cleanLine);
-        }
-      }
-    });
-    
-    return recommendations.length > 0 ? recommendations : [
-      'Stay alert and aware of your surroundings',
-      'Follow local emergency guidelines',
-      'Keep emergency contacts readily available',
-      'Monitor weather and road conditions'
-    ];
-  }
-
-  /**
-   * Parse warnings from AI response
-   */
-  private parseWarnings(text: string): string[] {
-    const warnings: string[] = [];
-    const lines = text.split('\n');
-    
-    lines.forEach(line => {
-      if (line.toLowerCase().includes('warning') || line.toLowerCase().includes('caution')) {
-        warnings.push(line.trim());
-      }
-    });
-    
-    return warnings;
-  }
 
   /**
    * Get fallback hazard summary when AI is unavailable
@@ -481,9 +295,78 @@ export class HazardSummaryService {
   }
 
   /**
-   * Get fallback recommendations when AI is unavailable
+   * Generate mock hazard summary based on analysis
    */
-  private getFallbackRecommendations(disasterType: string, severity: string): string[] {
+  private generateMockHazardSummary(analysis: any, disasterReports: DisasterReport[]): HazardSummary {
+    const riskLevel = analysis.overallRisk > 0.7 ? 'critical' : 
+                     analysis.overallRisk > 0.5 ? 'high' : 
+                     analysis.overallRisk > 0.3 ? 'medium' : 'low';
+
+    const summaries = {
+      low: "Current conditions in North-Eastern India show minimal disaster activity. Standard safety precautions are recommended for travelers.",
+      medium: "Moderate disaster activity detected in North-Eastern India. Exercise increased caution and stay informed about local conditions.",
+      high: "High disaster activity reported in North-Eastern India. Avoid non-essential travel and follow local emergency guidelines closely.",
+      critical: "Critical disaster situation in North-Eastern India. Immediate safety measures required. Avoid affected areas and follow emergency protocols."
+    };
+
+    return {
+      summary: summaries[riskLevel],
+      riskLevel,
+      affectedAreas: analysis.highRiskAreas.map((area: any) => 
+        `${area.lat.toFixed(4)}, ${area.lng.toFixed(4)}`
+      ),
+      recommendations: this.generateMockRecommendations('general', riskLevel),
+      weatherImpact: 'Monitor weather conditions closely in hilly terrain',
+      emergencyContacts: [
+        'Police: 100',
+        'Fire: 101', 
+        'Ambulance: 102',
+        'Disaster Management: 108'
+      ],
+      timestamp: new Date(),
+      confidence: 0.8,
+    };
+  }
+
+  /**
+   * Generate mock location assessment
+   */
+  private generateMockLocationAssessment(
+    latitude: number, 
+    longitude: number, 
+    riskFactors: any, 
+    nearbyReports: DisasterReport[]
+  ): HazardAssessment {
+    const recommendations = this.generateMockRecommendations('general', 
+      riskFactors.overallRisk > 0.7 ? 'critical' : 
+      riskFactors.overallRisk > 0.5 ? 'high' : 
+      riskFactors.overallRisk > 0.3 ? 'medium' : 'low'
+    );
+
+    const warnings = [];
+    if (riskFactors.terrain > 0.5) {
+      warnings.push('High terrain risk - be cautious of unstable slopes');
+    }
+    if (riskFactors.weather > 0.5) {
+      warnings.push('Weather conditions may be hazardous');
+    }
+    if (nearbyReports.length > 0) {
+      warnings.push(`${nearbyReports.length} recent incidents reported nearby`);
+    }
+
+    return {
+      location: { latitude, longitude },
+      riskFactors,
+      overallRisk: riskFactors.overallRisk,
+      recommendations,
+      warnings,
+    };
+  }
+
+  /**
+   * Generate mock recommendations based on disaster type and severity
+   */
+  private generateMockRecommendations(disasterType: string, severity: string): string[] {
     const baseRecommendations = [
       'Stay calm and assess the situation',
       'Move to a safe location if possible',
@@ -516,13 +399,26 @@ export class HazardSummaryService {
         'Evacuate immediately if safe to do so',
         'Stay low to avoid smoke',
         'Call fire department immediately'
+      ],
+      general: [
+        'Stay alert and aware of your surroundings',
+        'Keep emergency contacts readily available',
+        'Monitor local news and weather updates',
+        'Share your location with trusted contacts'
       ]
     };
 
     return [
       ...baseRecommendations,
-      ...(typeSpecificRecommendations[disasterType] || [])
+      ...(typeSpecificRecommendations[disasterType] || typeSpecificRecommendations.general)
     ];
+  }
+
+  /**
+   * Get fallback recommendations when AI is unavailable
+   */
+  private getFallbackRecommendations(disasterType: string, severity: string): string[] {
+    return this.generateMockRecommendations(disasterType, severity);
   }
 }
 

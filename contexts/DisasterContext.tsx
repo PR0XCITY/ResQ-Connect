@@ -1,15 +1,17 @@
 /**
- * Disaster Management Context for ResQ Connect
- * 
- * Provides disaster reporting, location monitoring, and hazard assessment
- * functionality for the disaster management module.
+ * Disaster Management Context (demo): centralizes location, reports, and zones.
+ *
+ * Provides state and functions for disaster reports and danger zones backed by
+ * mock services. Consumers like the Disaster Map subscribe to this context to
+ * render pins and submit demo-only reports.
  */
 
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import * as Location from 'expo-location';
-import { supabase, disasters, dangerZones, DisasterReport, DangerZone } from '@/src/lib/supabase';
+import { disasters, dangerZones, DisasterReport, DangerZone } from '@/src/lib/supabase';
 import { useAuth } from './AuthContext';
 
+// Context shape: consumed by UI to show pins and submit/refresh mock data
 interface DisasterContextType {
   currentLocation: Location.LocationObject | null;
   disasterReports: DisasterReport[];
@@ -127,6 +129,7 @@ export function DisasterProvider({ children }: DisasterProviderProps) {
     setError(null);
 
     try {
+      // Forward to mock backend layer; prepend result into local state for UI immediacy
       const newReport = await disasters.reportDisaster(report);
       setDisasterReports(prev => [newReport, ...prev]);
     } catch (err) {

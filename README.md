@@ -141,3 +141,29 @@ This will start the app in demo mode with:
 - **iOS Simulator**: Press `i` (Mac only)
 - **Android Emulator**: Press `a`
 
+---
+
+## Prototype Enhancements (demo-only)
+
+The following improvements were added on branch `prototype/disaster-enhanced` and are fully mock-based (no backend or API keys required):
+
+- Inline documentation across Disaster module files
+  - `app/(tabs)/disaster-map.tsx`: screen overview, data flow, state purpose
+  - `components/WebMap.tsx`: props, marker/popup structure, platform notes
+  - `contexts/DisasterContext.tsx`: context shape and mock-service usage
+  - `src/services/mock-data-service.ts`: localStorage mock flow
+- Filter by disaster type on Disaster Map (in-memory)
+- Severity selector in Report Disaster form; shown on map popups and cards
+- Last-updated indicator in Disaster Map header (reflects mock refresh time)
+- Light spacing/typography polish with responsiveness preserved
+
+Run the demo:
+
+```bash
+npm run demo
+```
+
+Notes:
+- These features are for prototype/demo purposes only
+- All data is mocked and stored in `localStorage`; no network calls are made
+

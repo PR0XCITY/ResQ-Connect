@@ -1,11 +1,18 @@
 /**
- * Disaster Map Screen for ResQ Connect
- * 
- * Interactive map showing disaster reports, danger zones, and safety information
- * for the disaster management module.
+ * Disaster Map Screen (demo): displays mock reports, allows reporting, filtering, and shows last update time.
+ *
+ * Purpose
+ * - Render mock disaster reports and danger zones on a web map (Leaflet)
+ * - Submit demo-only reports that persist to localStorage via context services
+ * - Filter visible pins by disaster type (client-side)
+ * - Show a "last updated" timestamp for when data was refreshed
+ *
+ * Data Flow (demo)
+ * Report modal → local state → useDisaster.reportDisaster() → mock-data-service (localStorage)
+ * → useDisaster.refreshDisasterReports() → `disasterReports` → markers in `WebMap`
  */
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import {
   View,
   Text,
@@ -17,8 +24,8 @@ import {
   Alert,
   Dimensions,
   ScrollView,
+  Platform,
 } from 'react-native';
-import MapView, { Marker, Circle, PROVIDER_GOOGLE } from 'react-native-maps';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as ImagePicker from 'expo-image-picker';
 import { 
@@ -37,6 +44,9 @@ import { useTheme } from '@/contexts/ThemeContext';
 import { useDisaster } from '@/contexts/DisasterContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { DisasterReport } from '@/src/lib/supabase';
+
+// Web-compatible map component
+import WebMap from '@/components/WebMap';
 
 const { width, height } = Dimensions.get('window');
 
@@ -83,11 +93,19 @@ export default function DisasterMapScreen() {
     severity: 'medium' as 'low' | 'medium' | 'high' | 'critical',
     photo: null as string | null,
   });
+  const [lastUpdatedAt, setLastUpdatedAt] = useState<string | null>(null);
 
-  const mapRef = useRef<MapView>(null);
+  const mapRef = useRef<any>(null);
+
+  const filteredReports = useMemo(() => {
+    return disasterReports.filter(r => filters.disasterTypes.includes(r.disaster_type));
+  }, [disasterReports, filters.disasterTypes]);
 
   useEffect(() => {
-    refreshDisasterReports();
+    (async () => {
+      await refreshDisasterReports();
+      setLastUpdatedAt(new Date().toISOString());
+    })();
   }, []);
 
   const handleReportDisaster = async () => {
@@ -119,6 +137,8 @@ export default function DisasterMapScreen() {
         severity: 'medium',
         photo: null,
       });
+      await refreshDisasterReports();
+      setLastUpdatedAt(new Date().toISOString());
       
       Alert.alert('Success', 'Disaster report submitted successfully!');
     } catch (error: any) {
@@ -172,27 +192,91 @@ export default function DisasterMapScreen() {
     },
     map: {
       flex: 1,
+      ...(Platform.OS === 'web' && {
+        minHeight: '100vh',
+        width: '100%',
+      }),
     },
     header: {
       position: 'absolute',
-      top: 50,
+      top: Platform.OS === 'web' ? 20 : 50,
       left: 20,
       right: 20,
       zIndex: 1000,
+      ...(Platform.OS === 'web' && {
+        maxWidth: 1200,
+        alignSelf: 'center',
+      }),
     },
     headerContent: {
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
+      ...(Platform.OS === 'web' && {
+        paddingHorizontal: 16,
+        paddingVertical: 12,
+        backgroundColor: 'rgba(255, 255, 255, 0.95)',
+        borderRadius: 12,
+        backdropFilter: 'blur(10px)',
+        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+      }),
     },
     title: {
-      fontSize: 24,
+      fontSize: Platform.OS === 'web' ? 28 : 24,
       fontWeight: 'bold',
       color: theme.colors.text,
+      ...(Platform.OS === 'web' && {
+        textShadow: '0 1px 2px rgba(0, 0, 0, 0.1)',
+      }),
     },
     controls: {
       flexDirection: 'row',
       gap: 12,
+    },
+    lastUpdatedText: {
+      fontSize: 12,
+      color: theme.colors.textSecondary,
+    },
+    filterModalSection: {
+      marginBottom: 16,
+    },
+    filterPill: {
+      paddingHorizontal: 12,
+      paddingVertical: 8,
+      borderRadius: 16,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+      marginRight: 8,
+      marginBottom: 8,
+      backgroundColor: theme.colors.card,
+    },
+    filterPillSelected: {
+      borderColor: theme.colors.primary,
+    },
+    filterActions: {
+      flexDirection: 'row',
+      justifyContent: 'flex-end',
+      gap: 12,
+      marginTop: 8,
+    },
+    smallButton: {
+      paddingHorizontal: 14,
+      paddingVertical: 10,
+      borderRadius: 10,
+      backgroundColor: theme.colors.card,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+    },
+    smallPrimaryButton: {
+      backgroundColor: theme.colors.primary,
+      borderColor: theme.colors.primary,
+    },
+    smallButtonText: {
+      color: theme.colors.text,
+      fontWeight: '600',
+    },
+    smallPrimaryButtonText: {
+      color: '#FFFFFF',
     },
     controlButton: {
       backgroundColor: theme.colors.card,
@@ -206,12 +290,12 @@ export default function DisasterMapScreen() {
     },
     floatingButton: {
       position: 'absolute',
-      bottom: 30,
-      right: 20,
+      bottom: Platform.OS === 'web' ? 40 : 30,
+      right: Platform.OS === 'web' ? 40 : 20,
       backgroundColor: theme.colors.primary,
-      borderRadius: 30,
-      width: 60,
-      height: 60,
+      borderRadius: Platform.OS === 'web' ? 16 : 30,
+      width: Platform.OS === 'web' ? 64 : 60,
+      height: Platform.OS === 'web' ? 64 : 60,
       alignItems: 'center',
       justifyContent: 'center',
       shadowColor: theme.colors.primary,
@@ -219,11 +303,24 @@ export default function DisasterMapScreen() {
       shadowOpacity: 0.3,
       shadowRadius: 8,
       elevation: 4,
+      ...(Platform.OS === 'web' && {
+        cursor: 'pointer',
+        transition: 'all 0.2s ease',
+        '&:hover': {
+          transform: 'scale(1.05)',
+          boxShadow: '0 6px 12px rgba(0, 0, 0, 0.15)',
+        },
+      }),
     },
     modalOverlay: {
       flex: 1,
       backgroundColor: 'rgba(0, 0, 0, 0.5)',
       justifyContent: 'flex-end',
+      ...(Platform.OS === 'web' && {
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: 20,
+      }),
     },
     modalContent: {
       backgroundColor: theme.colors.background,
@@ -231,6 +328,13 @@ export default function DisasterMapScreen() {
       borderTopRightRadius: 20,
       maxHeight: height * 0.8,
       padding: 20,
+      ...(Platform.OS === 'web' && {
+        borderRadius: 20,
+        maxHeight: '80vh',
+        maxWidth: 600,
+        width: '100%',
+        boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+      }),
     },
     modalHeader: {
       flexDirection: 'row',
@@ -390,66 +494,49 @@ export default function DisasterMapScreen() {
     },
   });
 
+  // Render different map components based on platform
+  const renderMap = () => {
+    if (Platform.OS === 'web') {
+      return (
+        <WebMap
+          ref={mapRef}
+          style={dynamicStyles.map}
+          currentLocation={currentLocation}
+          disasterReports={filteredReports}
+          dangerZones={dangerZones}
+          onMarkerClick={setSelectedDisaster}
+          selectedDisaster={selectedDisaster}
+        />
+      );
+    } else {
+      // For mobile platforms, show a placeholder or use react-native-maps
+      return (
+        <View style={[dynamicStyles.map, { justifyContent: 'center', alignItems: 'center' }]}>
+          <Text style={{ fontSize: 18, color: theme.colors.text, textAlign: 'center' }}>
+            Map functionality requires web platform
+          </Text>
+          <Text style={{ fontSize: 14, color: theme.colors.textSecondary, marginTop: 8, textAlign: 'center' }}>
+            Please access this app through a web browser
+          </Text>
+        </View>
+      );
+    }
+  };
+
   return (
     <SafeAreaView style={dynamicStyles.container}>
-      <MapView
-        ref={mapRef}
-        style={dynamicStyles.map}
-        provider={PROVIDER_GOOGLE}
-        initialRegion={{
-          latitude: currentLocation?.coords.latitude || 26.1445,
-          longitude: currentLocation?.coords.longitude || 91.7362,
-          latitudeDelta: 0.0922,
-          longitudeDelta: 0.0421,
-        }}
-        showsUserLocation
-        showsMyLocationButton
-      >
-        {/* Disaster Report Markers */}
-        {disasterReports.map((report) => (
-          <Marker
-            key={report.id}
-            coordinate={{
-              latitude: report.latitude,
-              longitude: report.longitude,
-            }}
-            onPress={() => setSelectedDisaster(report)}
-          >
-            <View style={{
-              backgroundColor: getDisasterColor(report.disaster_type),
-              borderRadius: 20,
-              padding: 8,
-              borderWidth: 2,
-              borderColor: '#FFFFFF',
-            }}>
-              <Text style={{ color: '#FFFFFF', fontSize: 16 }}>
-                {DISASTER_TYPES.find(t => t.id === report.disaster_type)?.icon || '⚠️'}
-              </Text>
-            </View>
-          </Marker>
-        ))}
-
-        {/* Danger Zone Circles */}
-        {dangerZones.map((zone) => (
-          <Circle
-            key={zone.id}
-            center={{
-              latitude: JSON.parse(zone.polygon).coordinates[0][0][1],
-              longitude: JSON.parse(zone.polygon).coordinates[0][0][0],
-            }}
-            radius={1000} // 1km radius
-            fillColor="rgba(239, 68, 68, 0.2)"
-            strokeColor="rgba(239, 68, 68, 0.8)"
-            strokeWidth={2}
-          />
-        ))}
-      </MapView>
+      {renderMap()}
 
       {/* Header */}
       <View style={dynamicStyles.header}>
         <View style={dynamicStyles.headerContent}>
           <Text style={dynamicStyles.title}>Disaster Map</Text>
           <View style={dynamicStyles.controls}>
+            {lastUpdatedAt && (
+              <Text style={dynamicStyles.lastUpdatedText}>
+                Last updated {formatTimeAgo(lastUpdatedAt)}
+              </Text>
+            )}
             <TouchableOpacity
               style={dynamicStyles.controlButton}
               onPress={() => setShowFilterModal(true)}
@@ -570,6 +657,77 @@ export default function DisasterMapScreen() {
                   {loading ? 'Submitting...' : 'Submit Report'}
                 </Text>
               </TouchableOpacity>
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Filter Modal: filter by disaster type (demo-only, in-memory) */}
+      <Modal
+        visible={showFilterModal}
+        animationType="fade"
+        transparent
+        onRequestClose={() => setShowFilterModal(false)}
+      >
+        <View style={dynamicStyles.modalOverlay}>
+          <View style={dynamicStyles.modalContent}>
+            <View style={dynamicStyles.modalHeader}>
+              <Text style={dynamicStyles.modalTitle}>Filter Reports</Text>
+              <TouchableOpacity
+                style={dynamicStyles.closeButton}
+                onPress={() => setShowFilterModal(false)}
+              >
+                <X size={24} color={theme.colors.text} />
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView showsVerticalScrollIndicator={false}>
+              <View style={dynamicStyles.filterModalSection}>
+                <Text style={dynamicStyles.label}>Disaster Type</Text>
+                <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
+                  {DISASTER_TYPES.map((type) => {
+                    const selected = filters.disasterTypes.includes(type.id);
+                    return (
+                      <TouchableOpacity
+                        key={type.id}
+                        style={[dynamicStyles.filterPill, selected && dynamicStyles.filterPillSelected]}
+                        onPress={() => {
+                          setFilters(prev => {
+                            const exists = prev.disasterTypes.includes(type.id);
+                            return {
+                              ...prev,
+                              disasterTypes: exists
+                                ? prev.disasterTypes.filter(id => id !== type.id)
+                                : [...prev.disasterTypes, type.id],
+                            };
+                          });
+                        }}
+                      >
+                        <Text style={{ color: theme.colors.text }}>{type.icon} {type.label}</Text>
+                      </TouchableOpacity>
+                    );
+                  })}
+                </View>
+              </View>
+
+              <View style={dynamicStyles.filterActions}>
+                <TouchableOpacity
+                  style={dynamicStyles.smallButton}
+                  onPress={() => setFilters({
+                    disasterTypes: DISASTER_TYPES.map(t => t.id),
+                    severityLevels: SEVERITY_LEVELS.map(s => s.id),
+                    timeRange: 'all',
+                  })}
+                >
+                  <Text style={dynamicStyles.smallButtonText}>Clear</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[dynamicStyles.smallButton, dynamicStyles.smallPrimaryButton]}
+                  onPress={() => setShowFilterModal(false)}
+                >
+                  <Text style={[dynamicStyles.smallButtonText, dynamicStyles.smallPrimaryButtonText]}>Apply</Text>
+                </TouchableOpacity>
+              </View>
             </ScrollView>
           </View>
         </View>

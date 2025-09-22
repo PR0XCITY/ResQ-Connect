@@ -6,8 +6,18 @@
  */
 
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { Session, User } from '@supabase/supabase-js';
-import { supabase, auth, Profile } from '@/src/lib/supabase';
+import { auth, Profile } from '@/src/lib/supabase';
+
+// Mock types for compatibility
+interface User {
+  id: string;
+  email: string;
+  created_at: string;
+}
+
+interface Session {
+  user: User;
+}
 
 interface AuthContextType {
   session: Session | null;
@@ -36,32 +46,33 @@ export function AuthProvider({ children }: AuthProviderProps) {
   // Initialize auth state
   useEffect(() => {
     // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        loadProfile(session.user.id);
+    auth.getCurrentUser().then((user) => {
+      if (user) {
+        setUser(user);
+        setSession({ user });
+        loadProfile(user.id);
       } else {
         setLoading(false);
       }
     });
 
-    // Listen for auth changes
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, session) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      
-      if (session?.user) {
-        await loadProfile(session.user.id);
+    // Simulate auth state change listener
+    const checkAuthState = async () => {
+      const user = await auth.getCurrentUser();
+      if (user) {
+        setUser(user);
+        setSession({ user });
+        await loadProfile(user.id);
       } else {
         setProfile(null);
         setLoading(false);
       }
-    });
+    };
 
-    return () => subscription.unsubscribe();
+    // Check auth state periodically
+    const interval = setInterval(checkAuthState, 1000);
+    
+    return () => clearInterval(interval);
   }, []);
 
   // Load user profile
