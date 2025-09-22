@@ -246,7 +246,8 @@ export default function ProfileScreen() {
                 <User size={32} color="#8B5CF6" />
               </View>
               <View style={styles.profileInfo}>
-                {/* Anonymized: user identity hidden in demo mode */}
+                <Text style={dynamicStyles.profileName}>Account: Demo User (private)</Text>
+                <Text style={dynamicStyles.profileEmail}>Profile editing will be available in full release.</Text>
               </View>
             </View>
           </Animated.View>
