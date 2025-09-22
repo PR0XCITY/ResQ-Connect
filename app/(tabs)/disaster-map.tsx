@@ -43,7 +43,7 @@ import {
 import { useTheme } from '@/contexts/ThemeContext';
 import { useDisaster } from '@/contexts/DisasterContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { DisasterReport } from '@/src/lib/supabase';
+import { DisasterReport } from '@/src/lib/supabase.mock';
 
 // Web-compatible map component
 import WebMap from '@/components/WebMap';

@@ -162,38 +162,44 @@ const STORAGE_KEYS = {
   DANGER_ZONES: 'resq_danger_zones',
 };
 
-// Helper functions
-function getFromStorage<T>(key: string, defaultValue: T): T {
+// Helper functions (cross-platform storage)
+import { getItem as storageGetItem, setItem as storageSetItem, removeItem as storageRemoveItem } from '@/src/services/storage';
+
+async function getFromStorage<T>(key: string, defaultValue: T): Promise<T> {
   try {
-    const stored = localStorage.getItem(key);
+    const stored = await storageGetItem(key);
     return stored ? JSON.parse(stored) : defaultValue;
   } catch {
     return defaultValue;
   }
 }
 
-function setToStorage<T>(key: string, value: T): void {
+async function setToStorage<T>(key: string, value: T): Promise<void> {
   try {
-    localStorage.setItem(key, JSON.stringify(value));
+    await storageSetItem(key, JSON.stringify(value));
   } catch (error) {
-    console.warn('Failed to save to localStorage:', error);
+    console.warn('Failed to save to storage:', error);
   }
 }
 
 // Initialize storage with mock data: one-time seeding on module load
-function initializeStorage() {
-  if (!localStorage.getItem(STORAGE_KEYS.USER)) {
-    setToStorage(STORAGE_KEYS.USER, DEMO_USER);
+async function initializeStorage() {
+  const hasUser = await storageGetItem(STORAGE_KEYS.USER);
+  if (!hasUser) {
+    await setToStorage(STORAGE_KEYS.USER, DEMO_USER);
   }
-  if (!localStorage.getItem(STORAGE_KEYS.DISASTERS)) {
-    setToStorage(STORAGE_KEYS.DISASTERS, MOCK_DISASTER_REPORTS);
+  const hasDisasters = await storageGetItem(STORAGE_KEYS.DISASTERS);
+  if (!hasDisasters) {
+    await setToStorage(STORAGE_KEYS.DISASTERS, MOCK_DISASTER_REPORTS);
   }
-  if (!localStorage.getItem(STORAGE_KEYS.DANGER_ZONES)) {
-    setToStorage(STORAGE_KEYS.DANGER_ZONES, MOCK_DANGER_ZONES);
+  const hasZones = await storageGetItem(STORAGE_KEYS.DANGER_ZONES);
+  if (!hasZones) {
+    await setToStorage(STORAGE_KEYS.DANGER_ZONES, MOCK_DANGER_ZONES);
   }
 }
 
-// Initialize on module load
+// Initialize on module load (fire and forget)
+// eslint-disable-next-line @typescript-eslint/no-floating-promises
 initializeStorage();
 
 // Auth service
@@ -222,8 +228,8 @@ export const authService = {
       },
     };
     
-    setToStorage(STORAGE_KEYS.USER, profile);
-    setToStorage(STORAGE_KEYS.SESSION, { user, session: { user } });
+    await setToStorage(STORAGE_KEYS.USER, profile);
+    await setToStorage(STORAGE_KEYS.SESSION, { user, session: { user } });
     
     return { data: { user, session: { user } }, error: null };
   },
@@ -240,7 +246,7 @@ export const authService = {
       created_at: new Date().toISOString(),
     };
     
-    setToStorage(STORAGE_KEYS.SESSION, { user, session: { user } });
+    await setToStorage(STORAGE_KEYS.SESSION, { user, session: { user } });
     
     return { data: { user, session: { user } }, error: null };
   },
@@ -251,13 +257,13 @@ export const authService = {
     // Simulate API delay
     await new Promise(resolve => setTimeout(resolve, 500));
     
-    localStorage.removeItem(STORAGE_KEYS.SESSION);
+    await storageRemoveItem(STORAGE_KEYS.SESSION);
     
     return { error: null };
   },
 
   async getCurrentUser() {
-    const session = getFromStorage(STORAGE_KEYS.SESSION, null);
+    const session = await getFromStorage(STORAGE_KEYS.SESSION, null);
     return session?.user || null;
   },
 
@@ -266,7 +272,7 @@ export const authService = {
   },
 
   async updateProfile(updates: Partial<Profile>) {
-    const currentProfile = getFromStorage(STORAGE_KEYS.USER, null);
+    const currentProfile = await getFromStorage(STORAGE_KEYS.USER, null);
     if (!currentProfile) throw new Error('No authenticated user');
     
     const updatedProfile = {
@@ -275,7 +281,7 @@ export const authService = {
       updated_at: new Date().toISOString(),
     };
     
-    setToStorage(STORAGE_KEYS.USER, updatedProfile);
+    await setToStorage(STORAGE_KEYS.USER, updatedProfile);
     return updatedProfile;
   },
 };
@@ -299,9 +305,9 @@ export const disasterService = {
     };
     
     // Persist to localStorage (front-of-list for recency)
-    const disasters = getFromStorage(STORAGE_KEYS.DISASTERS, []);
+    const disasters = await getFromStorage(STORAGE_KEYS.DISASTERS, [] as DisasterReport[]);
     disasters.unshift(newReport);
-    setToStorage(STORAGE_KEYS.DISASTERS, disasters);
+    await setToStorage(STORAGE_KEYS.DISASTERS, disasters);
     
     return newReport;
   },
@@ -313,14 +319,14 @@ export const disasterService = {
     await new Promise(resolve => setTimeout(resolve, 500));
     
     // Read from localStorage and slice for pagination demo
-    const disasters = getFromStorage(STORAGE_KEYS.DISASTERS, []);
+    const disasters = await getFromStorage(STORAGE_KEYS.DISASTERS, [] as DisasterReport[]);
     return disasters.slice(offset, offset + limit);
   },
 
   async getDisasterReportsByLocation(lat: number, lng: number, radiusKm = 10, limit = 50) {
     console.log('Mock get disasters by location:', { lat, lng, radiusKm, limit });
     
-    const disasters = getFromStorage(STORAGE_KEYS.DISASTERS, []);
+    const disasters = await getFromStorage(STORAGE_KEYS.DISASTERS, [] as DisasterReport[]);
     
     // Filter disasters within radius
     const nearbyDisasters = disasters.filter(report => {
@@ -341,7 +347,7 @@ export const disasterService = {
       report.status = verified ? 'verified' : 'false_alarm';
       report.verified_at = new Date().toISOString();
       report.verified_by = 'admin';
-      setToStorage(STORAGE_KEYS.DISASTERS, disasters);
+      await setToStorage(STORAGE_KEYS.DISASTERS, disasters);
     }
     
     return report;
@@ -356,13 +362,13 @@ export const dangerZoneService = {
     // Simulate API delay
     await new Promise(resolve => setTimeout(resolve, 500));
     
-    return getFromStorage(STORAGE_KEYS.DANGER_ZONES, []);
+    return getFromStorage(STORAGE_KEYS.DANGER_ZONES, [] as DangerZone[]);
   },
 
   async checkLocationInDangerZone(lat: number, lng: number) {
     console.log('Mock check location in danger zone:', { lat, lng });
     
-    const zones = getFromStorage(STORAGE_KEYS.DANGER_ZONES, []);
+    const zones = await getFromStorage(STORAGE_KEYS.DANGER_ZONES, [] as DangerZone[]);
     
     // Check if location is in any danger zone (simplified)
     const inDangerZone = zones.some(zone => {

@@ -8,7 +8,7 @@
 
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import * as Location from 'expo-location';
-import { disasters, dangerZones, DisasterReport, DangerZone } from '@/src/lib/supabase';
+import { disasters, dangerZones, DisasterReport, DangerZone } from '@/src/lib/supabase.mock';
 import { useAuth } from './AuthContext';
 
 // Context shape: consumed by UI to show pins and submit/refresh mock data

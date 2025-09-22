@@ -15,9 +15,22 @@ import {
   DisasterReport,
   DangerZone
 } from '@/src/services/mock-data-service';
+import Constants from 'expo-constants';
 
 // Export types
 export type { Profile, DisasterReport, DangerZone };
+
+export function getSupabaseClient() {
+  const demoFlag = (Constants.expoConfig?.extra as any)?.demoMode;
+  const demoEnv = process.env.EXPO_PUBLIC_DEMO_MODE;
+  const isDemo = demoFlag === true || demoEnv !== 'false';
+  if (isDemo) {
+    // Return the mock client in demo mode
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    return require('@/src/lib/supabase.mock').supabase as typeof supabase;
+  }
+  return supabase;
+}
 
 // Mock supabase client for compatibility
 export const supabase = {

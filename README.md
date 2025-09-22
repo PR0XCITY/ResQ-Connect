@@ -1,3 +1,24 @@
+## Expo Go fixes
+
+This project supports running in Expo Go without crashes by:
+
+- Using a cross-platform storage wrapper that selects AsyncStorage on native, `localStorage` on web, with a memory fallback.
+- Running in demo mode by default (no API keys or real network calls). Supabase is stubbed with local mock services.
+- Adding lightweight RN polyfills for URL and crypto randomness.
+
+How to run:
+
+```
+npm install
+npx expo start -c
+```
+
+If LAN issues occur:
+
+```
+npx expo start --tunnel
+```
+
 # 🚨 ResQ Connect
 
 the world doesn't need another app. it needs trust. it needs safety. it needs **ResQ Connect**.  

@@ -1,3 +1,8 @@
+Demo mode
+---------
+
+Set `EXPO_PUBLIC_DEMO_MODE=true` in your environment (see `.env.example`). In demo mode, the app uses local mocks and storage suitable for Expo Go.
+
 # README Analysis: Saheli → ResQ Connect Refactor
 
 ## Project Summary (6-8 bullet points)
