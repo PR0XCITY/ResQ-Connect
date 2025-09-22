@@ -58,7 +58,7 @@ so ResQ Connect speaks through vibrations, haptics, and voice.
 
 ## security & privacy
 
-safety is useless without privacy. saheli protects both.  
+safety is useless without privacy. ResQ Connect protects both.  
 
 - end-to-end encrypted cloud storage  
 - local + cloud recording for redundancy  

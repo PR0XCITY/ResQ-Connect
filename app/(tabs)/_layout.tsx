@@ -69,15 +69,7 @@ export default function TabLayout() {
           ),
         }}
       />
-      <Tabs.Screen
-        name="donate"
-        options={{
-          title: 'Donate',
-          tabBarIcon: ({ size, color }) => (
-            <Heart size={size} color={color} />
-          ),
-        }}
-      />
+      {/** Donate tab removed for prototype */}
       <Tabs.Screen
         name="profile"
         options={{

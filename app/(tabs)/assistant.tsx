@@ -92,7 +92,7 @@ Would you like specific advice for any particular situation?`;
     }
     
     if (lowerMessage.includes('route') || lowerMessage.includes('destination')) {
-      return `**Finding Safe Routes with Saheli:**
+      return `**Finding Safe Routes with ResQ Connect:**
 
 🗺️ **Use Safe Routes Tab**
 - Check community-verified safe paths
@@ -154,7 +154,7 @@ Remember: In a real emergency, always call local emergency services (911, 100, e
 🛡️ **Immediate Safety**
 - Trust your instincts - if you feel uncomfortable, take action
 - Move to a public, well-lit area with other people around
-- Use Saheli's emergency alert if you feel threatened
+- Use ResQ Connect's emergency alert if you feel threatened
 
 🗣️ **Verbal Response**
 - Be firm and clear: "Stop" or "Leave me alone"
@@ -212,13 +212,13 @@ What specific topic would you like to discuss?`;
     
     return `Thank you for your question! While I can provide general safety advice, for specific situations I recommend:
 
-🔍 **For immediate safety concerns**: Use Saheli's emergency alert feature or contact local emergency services
+🔍 **For immediate safety concerns**: Use ResQ Connect's emergency alert feature or contact local emergency services
 
 📱 **For location-specific advice**: Check the Community Alerts tab for real-time local safety information
 
 🗺️ **For route planning**: Use the Safe Routes feature to find community-verified safe paths
 
-💬 **For detailed guidance**: Feel free to ask more specific questions about personal safety, emergency preparedness, or using Saheli's features.
+💬 **For detailed guidance**: Feel free to ask more specific questions about personal safety, emergency preparedness, or using ResQ Connect's features.
 
 Is there a particular safety topic you'd like to explore further?`;
   };
