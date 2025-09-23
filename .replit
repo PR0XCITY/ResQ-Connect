@@ -36,3 +36,8 @@ externalPort = 80
 [[ports]]
 localPort = 33141
 externalPort = 3000
+
+[deployment]
+deploymentTarget = "autoscale"
+run = ["bash", "-c", "cd dist && python3 -m http.server 5000"]
+build = ["npx", "expo", "export", "--platform", "web", "--output-dir", "dist"]
