@@ -24,8 +24,17 @@ if (Platform.OS === 'web') {
     Popup = reactLeaflet.Popup;
     Circle = reactLeaflet.Circle;
     
-    // Import CSS
-    require('leaflet/dist/leaflet.css');
+    // Load CSS dynamically for web
+    if (typeof document !== 'undefined') {
+      const link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+      link.integrity = 'sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=';
+      link.crossOrigin = '';
+      if (!document.querySelector(`link[href="${link.href}"]`)) {
+        document.head.appendChild(link);
+      }
+    }
   } catch (error) {
     console.warn('Leaflet not available on this platform:', error);
   }
